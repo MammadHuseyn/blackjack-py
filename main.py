@@ -10,7 +10,7 @@ with open('blackjack.txt', 'r', encoding='utf-8') as file:
     content = file.read()
     print(content)
 
-def clear_screen():
+def clear_screen(myHand, raptorHand, dealerShownHand):
     os.system('cls' if os.name == 'nt' else 'clear')
     with open('blackjack.txt', 'r', encoding='utf-8') as file:
         content = file.read()
@@ -23,7 +23,7 @@ def clear_screen():
 def print_text(text):
     print(text)
     time.sleep(1.5)
-    clear_screen()
+    clear_screen(myHand, raptorHand, dealerShownHand)
 
 
 raptor_winning_phrases = ["Play! You sucker!", "U can't beat me!",
@@ -53,6 +53,8 @@ def raptorsProvocation(Hand):
 cards = {
     'A':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9, '10':10, 'J':10, 'Q':10, 'K':10,
 }
+
+
 usedCards = []
 myHand = 0
 raptorHand = 0
@@ -67,28 +69,29 @@ def deal_card(flag):
     affir = random.choice(['♠', '♥', '♦', '♣'])
     card = f"{number}{affir}"
 
-    if card in usedCards:
+    while card in usedCards:
         deal_card(flag)
-    else:
-        usedCards.append(card)
+        return
+
+    usedCards.append(card)
     
     if flag == "player":
         myHand += cards[number]
         print_card(str(number), affir)
         time.sleep(1.5)
-        clear_screen()
+        clear_screen(myHand, raptorHand, dealerShownHand)
 
     elif flag == "raptor":
         raptorHand += cards[number]
         print_card(str(number), affir)
         time.sleep(1.5)
-        clear_screen()
+        clear_screen(myHand, raptorHand, dealerShownHand)
     elif flag == "0":
         dealerHand += cards[number]
         dealerShownHand += cards[number]
         print_card(str(number), affir)
         time.sleep(1.5)
-        clear_screen()
+        clear_screen(myHand, raptorHand, dealerShownHand)
     else:
         dealerHand += cards[number]
         dealerCard = card
@@ -109,11 +112,10 @@ def play_game():
     dealerShownHand = 0
     myself = False
     raptor = False
-    dealer = False
 
 
     for i in range(2):
-        clear_screen()
+        clear_screen(myHand, raptorHand, dealerShownHand)
         print_text("Dealer shuffling the deck...")
 
         print_text("Dealer gives you a card...")
@@ -170,14 +172,13 @@ def play_game():
     print_card(dealerCard[0],dealerCard[1])
     dealerShownHand += cards[dealerCard[0]]
     time.sleep(1.5)
-    clear_screen()
+    clear_screen(myHand, raptorHand, dealerShownHand)
 
     while dealerHand < 17:
         deal_card("0")
 
     if dealerHand > 21:
         dealer = True
-        print_text("Dealer BUSTS!")
         if myself == False and raptor == False:
             print("Both player and Raptor wins!")
         elif myself == False and raptor == True:
@@ -234,9 +235,9 @@ def play_game():
             else:
                 print("Player loses! Raptor ties with Dealer!")
 
-    # with open('dealer.txt', 'r', encoding='utf-8') as file:
-    #     content = file.read()
-    #     print(content)
+    with open('dealer.txt', 'r', encoding='utf-8') as file:
+        content = file.read()
+        print(content)
 
     print("If you want to play again, press 1. If you want to exit, press 2.")
     choice = input("Your choice: ")
@@ -247,7 +248,6 @@ def play_game():
         sys.exit(0)      
     
 input("Press Enter to start the game...")
-clear_screen()
+clear_screen(myHand, raptorHand, dealerShownHand)
 
 play_game()
-
