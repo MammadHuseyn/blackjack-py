@@ -35,6 +35,7 @@ raptor_loosing_phrases = ["Don't be harsh on me",
                           "Oh GOD!", "GOSH", "ARE U CHEATING?", "DO NOT LOOK AT ME",
                           "Jesus Christ!"]
 
+
 def raptorsProvocation(Hand):
     if Hand>18:
         cringeRate = random.randint(0, 100)
@@ -51,7 +52,7 @@ def raptorsProvocation(Hand):
             print_text(random.choice(raptor_winning_phrases))
 
 cards = {
-    'A':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9, '10':10, 'J':10, 'Q':10, 'K':10,
+    'A':[1,11], '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9, '10':10, 'J':10, 'Q':10, 'K':10,
 }
 
 
@@ -62,6 +63,15 @@ dealerHand = 0
 dealerShownHand = 0
 
 dealerCard = ""
+
+def add_card_to_hand(hand, card):
+    if card == 'A':
+        if hand + 11 <= 21:
+            return hand + 11
+        else:
+            return hand + 1
+    else:
+        return hand + cards[card]
 
 def deal_card(flag):
     global myHand, raptorHand, dealerHand, dealerShownHand, dealerCard
@@ -76,24 +86,24 @@ def deal_card(flag):
     usedCards.append(card)
     
     if flag == "player":
-        myHand += cards[number]
+        myHand = add_card_to_hand(myHand, number)
         print_card(str(number), affir)
         time.sleep(1.5)
         clear_screen(myHand, raptorHand, dealerShownHand)
 
     elif flag == "raptor":
-        raptorHand += cards[number]
+        raptorHand = add_card_to_hand(raptorHand, number)
         print_card(str(number), affir)
         time.sleep(1.5)
         clear_screen(myHand, raptorHand, dealerShownHand)
     elif flag == "0":
-        dealerHand += cards[number]
-        dealerShownHand += cards[number]
+        dealerHand = add_card_to_hand(dealerHand, number)
+        dealerShownHand = add_card_to_hand(dealerShownHand, number)
         print_card(str(number), affir)
         time.sleep(1.5)
         clear_screen(myHand, raptorHand, dealerShownHand)
     else:
-        dealerHand += cards[number]
+        dealerHand = add_card_to_hand(dealerHand, number)
         dealerCard = card
 
 
