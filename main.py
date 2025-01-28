@@ -17,7 +17,8 @@ def clear_screen():
         print(content)
     if myHand != 0:
         print(f"Your hand: {myHand}")
-    
+        print(f"Raptor's hand: {raptorHand}")
+        print(f"Dealer's hand: {dealerShownHand}")
 
 def print_text(text):
     print(text)
@@ -50,16 +51,19 @@ def raptorsProvocation(Hand):
             print_text(random.choice(raptor_winning_phrases))
 
 cards = {
-    'A':1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:9, 10:10, 'J':10, 'Q':10, 'K':10,
+    'A':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9, '10':10, 'J':10, 'Q':10, 'K':10,
 }
 usedCards = []
 myHand = 0
 raptorHand = 0
 dealerHand = 0
+dealerShownHand = 0
+
+dealerCard = ""
 
 def deal_card(flag):
-    global myHand, raptorHand, dealerHand
-    number = random.choice(['A', 2, 3, 4, 5, 6, 7, 8, 9, 10, 'J', 'Q', 'K'])
+    global myHand, raptorHand, dealerHand, dealerShownHand, dealerCard
+    number = random.choice(['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'])
     affir = random.choice(['♠', '♥', '♦', '♣'])
     card = f"{number}{affir}"
 
@@ -76,12 +80,21 @@ def deal_card(flag):
 
     elif flag == "raptor":
         raptorHand += cards[number]
+        print_card(str(number), affir)
+        time.sleep(1.5)
+        clear_screen()
+    elif flag == "0":
+        dealerHand += cards[number]
+        dealerShownHand += cards[number]
+        print_card(str(number), affir)
+        time.sleep(1.5)
+        clear_screen()
     else:
         dealerHand += cards[number]
+        dealerCard = card
 
 
 def should_hit(hand, opponent_hand, threshold=17):
-    # Hit if hand is below threshold or if opponent's hand is significantly higher
     return hand < threshold or (hand < opponent_hand and opponent_hand - hand > 4)
 
 
@@ -89,17 +102,15 @@ def should_hit(hand, opponent_hand, threshold=17):
 
 def play_game():
     usedCards.clear()
-    global myHand, raptorHand, dealerHand
+    global myHand, raptorHand, dealerHand, dealerShownHand
     myHand = 0
     raptorHand = 0
     dealerHand = 0
-
+    dealerShownHand = 0
+    myself = False
     raptor = False
     dealer = False
 
-    myCount = 0
-    raptorCount = 0
-    dealerCount = 0
 
     for i in range(2):
         clear_screen()
@@ -112,96 +123,120 @@ def play_game():
         deal_card("raptor")
 
         print_text("Dealer gives herself a card...")
-        deal_card("dealer")
+        deal_card(str(i))
 
-    while True:
-        choice = input("Do you want to hit or stand?: ")
+    choice = input("Do you want to hit or stand?: ")
+    while choice.lower() == "hit" and myself == False:
         if choice.lower() == "hit":
             print_text("Dealer gives you a card...")
             deal_card("player")
             if myHand > 21:
                 print_text("You went over 21! You lose!")
+                myself = True
                 break
-            if myHand == 21:
-                print_text("You got a blackjack! You win!")
+            elif myHand == 21:
+                print_text("You got a BLACKJACK! You are a Winner!")
+                myself = True
                 break
-            myCount = 0
         else:
-            myCount += 1
+            print_text('Player stands...')
+            break
+        choice = input("Do you want to hit or stand?: ")
+
+
+    while should_hit(raptorHand, myHand) == True and raptor == False:
+        print_text("Raptor hits...")
+        print_text("Dealer gives Raptor a card...")
+        deal_card("raptor")
+        if raptorHand > 21:
+            print_text("Raptor went over 21! Raptors lose!")
+            raptor = True
+            break
+        elif raptorHand == 21:
+            print_text("Raptor got a blackjack! Raptor wins!")
+            raptor = True
+            break
+
+    if raptor == False:
+        print_text("Raptor stands...")
+        print("Raptor:", end=" ")
+        raptorsProvocation(raptorHand)
         
-        if raptor == False:
-            print("Raptor:", end=" ")
-            raptorsProvocation(raptorHand)
+    if raptor == True and myself == True:
+        print("Both players lost!\nDealer WINS!")
+        return
 
-        if should_hit(raptorHand, myHand) and raptor == False:
-            print_text("Dealer gives Raptor a card...")
-            deal_card("raptor")
-            if raptorHand > 21:
-                print_text("Raptor went over 21! Raptors lose!")
-                raptor = True
-            elif raptorHand == 21:
-                print_text("Raptor got a blackjack! Raptor wins!")
-                break
-            raptorCount = 0
-        elif raptor == False:
-            print_text("Raptor stands.")
-            raptorCount += 1
-        
-        if should_hit(dealerHand, myHand) and dealer == False:
-            print_text("Dealer gives herself a card...")
-            deal_card("dealer")
-            if dealerHand > 21:
-                print_text("Dealer went over 21! Dealer lose!")
-                dealer = True
-            elif dealerHand == 21:
-                print_text("Dealer got a blackjack! Dealer wins!")
-                break
-            dealerCount = 0
-        elif dealer == False:
-            print_text("Dealer stands.")
-            dealerCount += 1
+    print_text("Dealer reveals her card...")
+    print_card(dealerCard[0],dealerCard[1])
+    dealerShownHand += cards[dealerCard[0]]
+    time.sleep(1.5)
+    clear_screen()
 
+    while dealerHand < 17:
+        deal_card("0")
 
-        if dealer and raptor:
-            print_text("Dealer and Raptor both lose, you win!")
-            break
+    if dealerHand > 21:
+        dealer = True
+        print_text("Dealer BUSTS!")
+        if myself == False and raptor == False:
+            print("Both player and Raptor wins!")
+        elif myself == False and raptor == True:
+            print("Player WINS!")
+        elif raptor == False and myself == True:
+            print("Raptor WINS!")
 
-        if myCount >= 2 and raptorCount >= 2 and dealerCount >= 2 and raptor == False and dealer == False:
-            print_text("Everyone stands. Let's see who wins!")
-            print_text("Revealing the cards...")
-            if myHand > raptorHand and myHand > dealerHand:
-                print("You win!")
-            elif raptorHand > myHand and raptorHand > dealerHand:
-                print("Raptor wins!")
-            elif dealerHand > myHand and dealerHand > raptorHand:
-                print("Dealer wins!")
-            else:
-                print("It's a tie!")
-            break
-        elif myCount >= 2 and raptorCount >= 2 and raptor == False and dealer == True:
-            print_text("You and Raptor both stands. Let's see who wins!")
-            print_text("Revealing the cards...")
-            if myHand > raptorHand:
-                print("You win!")
-            elif raptorHand > myHand:
-                print("Raptor wins!")
-            else:
-                print("It's a tie!")
-            break
-        elif myCount >= 2 and dealerCount >= 2 and raptor == True and dealer == False:
-            print("You and Dealer both stands. Let's see who wins!")
-            print("Revealing the cards...")
+    elif dealerHand == 21:
+        print("Dealer WINS!")
+
+    else:
+        if myself == False and raptor == False:
+            if myHand > dealerHand and raptorHand > dealerHand:
+                print("Both player and Raptor wins!")
+            elif myHand > dealerHand and raptorHand < dealerHand:
+                print("Player WINS!")
+            elif myHand < dealerHand and raptorHand > dealerHand:
+                print("Raptor WINS!")
+            elif myHand < dealerHand and raptorHand < dealerHand:
+                print("Both of player loses!\nDealer's hand is higher!\nDealer WINS!")
+        elif myself == True and raptor == False:
+            if raptorHand > dealerHand:
+                print("Raptor WINS!")
+            elif raptorHand < dealerHand:
+                print("Raptor loses!\nDealer WINS!")
+        elif myself == False and raptor == True:
             if myHand > dealerHand:
-                print("You win!")
-            elif dealerHand > myHand:
-                print("Dealer wins!")
-            else:
-                print("It's a tie!")
-            break
+                print("Player WINS!")
+            elif myHand < dealerHand:
+                print("Player loses!\nDealer WINS!")
 
-    with open('dealer.txt', 'r', encoding='utf-8') as file:
-        content = file.read()
-        print(content)
+
+
+        elif myHand == dealerHand and raptorHand == dealerHand:
+            print("It's a tie between all players and the dealer!")
+        elif myHand == dealerHand and raptorHand < dealerHand:
+            if myself == False:
+                print("Player ties with Dealer! Raptor loses!")
+            else:
+                print("Player loses! Raptor loses!")
+        elif myHand == dealerHand and raptorHand > dealerHand:
+            if myself == False:
+                print("Player ties with Dealer! Raptor wins!")
+            else:
+                print("Player loses! Raptor wins!")
+        elif myHand < dealerHand and raptorHand == dealerHand:
+            if raptor == False:
+                print("Raptor ties with Dealer! Player loses!")
+            else:
+                print("Raptor loses! Player loses!")
+        elif myHand > dealerHand and raptorHand == dealerHand:
+            if myself == False:
+                print("Player wins! Raptor ties with Dealer!")
+            else:
+                print("Player loses! Raptor ties with Dealer!")
+
+    # with open('dealer.txt', 'r', encoding='utf-8') as file:
+    #     content = file.read()
+    #     print(content)
 
     print("If you want to play again, press 1. If you want to exit, press 2.")
     choice = input("Your choice: ")
