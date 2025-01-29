@@ -121,7 +121,7 @@ def should_hit(hand, opponent_hand, threshold=17):
     else:
         return hand < threshold
 
-
+winnerTable = [0, 0, 0, 0]
 
 
 def play_game():
@@ -209,7 +209,13 @@ def play_game():
 
     print_text("Dealer reveals her card...")
     print_card(dealerCard[0],dealerCard[1])
-    dealerShownHand += cards[dealerCard[0]]
+    if dealerCard[0] == 'A':
+        if dealerShownHand + 11 <= 21:
+            dealerShownHand += 11
+        else:
+            dealerShownHand += 1
+    else:
+        dealerShownHand += cards[dealerCard[0]]
     time.sleep(1.5)
     clear_screen(myHand, raptorHand, crackerHand, dealerShownHand)
 
@@ -247,75 +253,147 @@ def play_game():
                 print("All players win!")
             elif myHand < dealerHand and raptorHand < dealerHand and crackerHand < dealerHand:
                 print("All players lose. Only Dealer WINS!")
+                player = True
+                raptor = True
+                cracker = True
             elif myHand > dealerHand and raptorHand < dealerHand and crackerHand < dealerHand:
                 print("Cracker and Raptor lose. Player and Dealer WIN!")
+                cracker = True
+                raptor = True
             elif myHand < dealerHand and raptorHand > dealerHand and crackerHand < dealerHand:
                 print("Player and Cracker lose. Raptor and Dealer WIN!")
+                player = True
+                cracker = True
             elif myHand < dealerHand and raptorHand < dealerHand and crackerHand > dealerHand:
                 print("Player and Raptor lose. Cracker and Dealer WIN!")
+                player = True
+                raptor = True
             elif myHand > dealerHand and raptorHand > dealerHand and crackerHand < dealerHand:
                 print("Cracker lose. Player, Raptor and Dealer WIN!")
+                cracker = True
             elif myHand > dealerHand and raptorHand < dealerHand and crackerHand > dealerHand:
                 print("Raptor lose. Player, Cracker and Dealer WIN!")
+                raptor = True
             elif myHand < dealerHand and raptorHand > dealerHand and crackerHand > dealerHand:
                 print("Player lose. Raptor, Cracker and Dealer WIN!")
+                player = True
         elif myself == True and raptor == False and cracker == False:
             if raptorHand > dealerHand and crackerHand > dealerHand:
                 print("Raptor and Cracker WIN!")
+                dealer = True
             elif raptorHand < dealerHand and crackerHand < dealerHand:
                 print("All players lose. Only Dealer WINS!")
+                player = True
+                raptor = True
+                cracker = True
             elif raptorHand > dealerHand and crackerHand < dealerHand:
                 print("Cracker loses. Raptor and Dealer WIN!")
+                cracker = True
             elif raptorHand < dealerHand and crackerHand > dealerHand:
                 print("Raptor loses. Cracker and Dealer WIN!")
+                raptor = True
         elif raptor == True and myself == False and cracker == False:
             if myHand > dealerHand and crackerHand > dealerHand:
                 print("Player and Cracker WIN!")
+                dealer = True
             elif myHand < dealerHand and crackerHand < dealerHand:
                 print("All players lose. Only Dealer WINS!")
+                player = True
+                raptor = True
+                cracker = True
             elif myHand > dealerHand and crackerHand < dealerHand:
                 print("Cracker loses. Player and Dealer WIN!")
+                cracker = True
             elif myHand < dealerHand and crackerHand > dealerHand:
                 print("Player loses. Cracker and Dealer WIN!")
+                player = True
         elif cracker == True and myself == False and raptor == False:
             if myHand > dealerHand and raptorHand > dealerHand:
                 print("Player and Raptor WIN!")
+                dealer = True
             elif myHand < dealerHand and raptorHand < dealerHand:
                 print("All players lose. Only Dealer WINS!")
+                player = True
+                raptor = True
+                cracker = True
             elif myHand > dealerHand and raptorHand < dealerHand:
                 print("Raptor loses. Player and Dealer WIN!")
+                raptor = True
             elif myHand < dealerHand and raptorHand > dealerHand:
                 print("Player loses. Raptor and Dealer WIN!")
+                player = True
         elif myself == True and raptor == True and cracker == False:
             if crackerHand > dealerHand:
                 print("Cracker WINS!")
+                dealer = True
             elif crackerHand < dealerHand:
                 print("All players lose. Only Dealer WINS!")
+                cracker = True
         elif myself == True and cracker == True and raptor == False:
             if raptorHand > dealerHand:
                 print("Raptor WINS!")
+                dealer = True
             elif raptorHand < dealerHand:
                 print("All players lose. Only Dealer WINS!")
+                raptor = True
         elif raptor == True and cracker == True and myself == False:
             if myHand > dealerHand:
                 print("Player WINS!")
+                dealer = True
             elif myHand < dealerHand:
                 print("All players lose. Only Dealer WINS!")
+                player = True
+    
+    if myself == True:
+        winnerTable[0] += 1
+    if raptor == True:
+        winnerTable[1] += 1
+    if cracker == True:
+        winnerTable[2] += 1
+    if dealer == True:
+        winnerTable[3] += 1
 
 #-----------------------------------------------------------------------------------------
-    with open('dealer.txt', 'r', encoding='utf-8') as file:
-        content = file.read()
-        print(content)
 
-    print("If you want to play again, press 1. If you want to exit, press 2.")
-    choice = input("Your choice: ")
-    if choice == "1":
-        play_game()
-    else:
-        print("Thanks for playing!")
-        sys.exit(0)      
+    myHand = 0
+    raptorHand = 0
+    dealerHand = 0
+    crackerHand = 0
+    dealerShownHand = 0
+    myself = False
+    raptor = False
+    cracker = False
+     
     
 input("Press Enter to start the game...")
 clear_screen(myHand, raptorHand, crackerHand, dealerShownHand)
 
-play_game()
+for i in range(3):
+    print_text(f"Round {i+1} is starting!")
+    time.sleep(1.5)
+    play_game()
+    clear_screen(myHand, raptorHand, crackerHand, dealerShownHand)
+    print("Round", i+1, "is over!")
+    with open('dealer.txt', 'r', encoding='utf-8') as file:
+        content = file.read()
+        print(content)
+    time.sleep(3)
+    clear_screen(myHand, raptorHand, crackerHand, dealerShownHand)
+
+clear_screen(myHand, raptorHand, crackerHand, dealerShownHand)
+print("All rounds are over!")
+print("Here are the results:")
+print("Player wins:", winnerTable[0])
+print("Raptor wins:", winnerTable[1])
+print("Cracker wins:", winnerTable[2])
+print("Dealer wins:", winnerTable[3])
+print("Thanks for playing!")
+with open('dealer.txt', 'r', encoding='utf-8') as file:
+    content = file.read()
+    print(content)
+print("If you want to play again, press 1. If you want to exit, press 2.")
+choice = input("Your choice: ")
+if choice == "1":
+    play_game()
+else:
+    sys.exit(0)
