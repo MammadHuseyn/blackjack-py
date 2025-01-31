@@ -135,7 +135,7 @@ def play_game():
     myself = False
     raptor = False
     cracker = False
-
+    dealer = False
 
     for i in range(2):
         clear_screen(myHand, raptorHand, crackerHand, dealerShownHand)
@@ -168,6 +168,8 @@ def play_game():
                 break
         else:
             print_text('Player stands...')
+            break
+        if myself == True:
             break
         choice = input("Do you want to hit or stand?: ")
 
@@ -368,7 +370,7 @@ def play_game():
 input("Press Enter to start the game...")
 clear_screen(myHand, raptorHand, crackerHand, dealerShownHand)
 
-for i in range(3):
+for i in range(1):
     print_text(f"Round {i+1} is starting!")
     time.sleep(1.5)
     play_game()
